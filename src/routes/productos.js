@@ -1,27 +1,26 @@
 const Router = require('express');
 const routerProductos = Router();
 
-const {Contenedor} = require('../src/contenedores/contenedor')
-contenedorProductos = new Contenedor('productos.txt')
+import ProductosDaoMongoDb from '../daos/productos/ProductosDaoMongoDb'
 
 //Cargo 2 productos de prueba
-contenedorProductos.guardarItem({nombre: 'lapicera', descripcion: 'lapicera azul', codigo: 'lap01234', foto: 'http//kjdhlksugdli', precio: 500, stock: 10 })
-contenedorProductos.guardarItem({nombre: 'regla', descripcion: 'regla transparente', codigo: 'lap01235', foto: 'http//kugytoulksugdli', precio: 650, stock: 10 })
+ProductosDaoMongoDb.guardar({title: 'lapicera', price: 500, thumbnail: 'http//kugytoulksugdli' })
+ProductosDaoMongoDb.guardar({title: 'lapiz', price: 480, thumbnail: 'http//kugytouloihlidli' })
 
-const {onlyAdmins} = require('../src/utils/onlyAdmins')
+import onlyAdmins from '../midlewares/onlyAdmins'
 
 
 routerProductos.get('/:id?',(req,res)=>{   // Si hay parametro obtiene producto por id, si no hay obtiene todos los productos
     const id = req.params.id
     if(id){
-        res.json(contenedorProductos.getById(Number(id)))
+        res.json(ProductosDaoMongoDb.listar(id))
     }else{
-        res.json(contenedorProductos.getAll())
+        res.json(ProductosDaoMongoDb.listarAll())
     }
 })
 
 routerProductos.post('/', onlyAdmins ,(req,res)=>{         // Agrega un producto
-    contenedorProductos.guardarItem(req.body)
+    ProductosDaoMongoDb.guardar(req.body)
     res.send('Producto guardado')
 })
 
