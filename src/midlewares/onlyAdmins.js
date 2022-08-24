@@ -1,4 +1,4 @@
-const isAdmin = false
+const isAdmin = true
 
 const onlyAdmins = (req, res, next)=>{
     isAdmin

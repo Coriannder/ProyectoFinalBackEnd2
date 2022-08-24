@@ -1,10 +1,22 @@
 
-const transformMongoArray = (array) => {
-    for (let i in array){
-        array[i].id = array[i]._id.toString()
-        delete array[i]._id
+    const transformMongoModel = (object) => {
+
+        let newObject = {...object._doc}
+        newObject.id = newObject._id.toString()
+        delete newObject._id
+        delete newObject.__v
+        return newObject
     }
-}
 
+    const transformMongoObject = (model) => {
+        let result
+        if(model.length >= 1){
+            result = model.map(elem => transformMongoModel(elem))
+        } else {
+            result = transformMongoModel(model)
+        }
+        return result
+    }
 
-export default   transformMongoArray
+export default   transformMongoObject
+

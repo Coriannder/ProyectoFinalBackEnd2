@@ -1,9 +1,11 @@
 import mongoose from 'mongoose'
-import config from '../utils/config'
-import transformMongoArray from '../utils/objectUtils'
+import config from '../utils/config.js'
+import transformMongoObject from '../utils/objectUtils.js'
+import transformMongoArray from '../utils/objectUtils.js'
 
 await  mongoose.connect(config.mongo.URL, config.mongo.options)
 .then(() => console.log('Base de datos conectada'))
+.catch(err => console.log("no se conecto"))
 
 
 class ContenedorMongoDb {
@@ -13,58 +15,53 @@ class ContenedorMongoDb {
 
     async listar(id) {
         try {
-            const docs =this.collection.find({_id: id} , {__v: 0})
-            if (docs.length == 0){
-                throw new Error(`Error id: ${id} no encontrado`)
-            } else {
-                const result = transformMongoArray(docs)[0]
-                return docs[0]
-            }
+            const res = await this.collection.find({_id: id})
+            return transformMongoObject(res)
         } catch (error) {
-            throw new Error(`Error al listar por id: ${error}`)
+            console.log(error)
+            return false
         }
     }
 
     async listarAll() {
         try {
-            const docs =this.collection.find({} , {__v: 0}).lean()
-            if (docs.length == 0){
-                throw new Error(`Error id: ${id} no encontrado`)
-            } else {
-                return transformMongoArray(docs)
-            }
+            const res = await this.collection.find({})
+            return transformMongoObject(res)
         } catch (error) {
-            throw new Error(`Error al listar por id: ${error}`)
+            console.log(error)
+            return false
         }
     }
 
     async guardar(elemento) {
         try {
-            const doc = await this.collection.create(elemento)
-            return doc
+            const res = await this.collection.create(elemento)
+            return transformMongoObject(res)
         } catch (error) {
-            throw new Error(`Error al guardar objeto: ${error}`)
+            console.log(error)
+            return false
         }
     }
 
     async actualizar(id, elemento) {
         try {
-            const doc =this.collection.update({_id: id} , {$set: {...elemento}})
-            return doc
-        }catch (error) {
-            throw new Error(`Error al listar por id: ${error}`)
+            const res = await this.collection.updateOne({_id: id} , {$set: {...elemento}})
+            return res.acknowledged
+        } catch (error) {
+            console.log(error)
+            return false
         }
     }
 
-    async borrar(id, objeto) {
+    async borrar(id) {
         try {
-            const doc = this.collection.update({_id: id} , {$set: {...objeto}})
-            return doc
-        }catch (error) {
-            throw new Error(`Error al listar por id: ${error}`)
+            const res = await   this.collection.deleteOne({_id: id})
+            return res.acknowledged
+        } catch (error) {
+            console.log(error)
+            return false
         }
     }
 }
-
 
 export default ContenedorMongoDb
